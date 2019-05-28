@@ -5,9 +5,7 @@
         android:id="@+id/overlayLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         android:background="@color/bg_activity_detail">
-
 
     <FrameLayout
             android:id="@+id/fragment_container"
@@ -16,8 +14,6 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-    />
-
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
