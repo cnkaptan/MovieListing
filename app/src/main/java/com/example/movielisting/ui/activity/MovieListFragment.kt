@@ -14,10 +14,17 @@ import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.example.movielisting.R
+import com.example.movielisting.data.local.entity.MovieEntity
+import com.example.movielisting.data.repository.ListType
+import com.example.movielisting.data.repository.POPULAR
+import com.example.movielisting.data.repository.TOP_RATED
+import com.example.movielisting.data.repository.UPCOMING
 import com.example.movielisting.ui.adapter.MoviesListAdapter
 import com.example.movielisting.ui.viewmodel.MovieListViewModel
+import com.example.movielisting.utils.PagingManager
 import dagger.android.support.AndroidSupportInjection
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 class MovieListFragment : Fragment() {
@@ -40,9 +47,8 @@ class MovieListFragment : Fragment() {
     private lateinit var topRatedMoviesListAdapter: MoviesListAdapter
     private lateinit var upcomingMoviesListAdapter: MoviesListAdapter
 
-
-    private var subscriptions = CompositeDisposable()
-
+    private val subscriptions = CompositeDisposable()
+    private val notifierSubject = PublishSubject.create<Pair<ListType, Long>>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AndroidSupportInjection.inject(this)
@@ -51,7 +57,7 @@ class MovieListFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_movie_list, container, false)
-        ButterKnife.bind(this,view)
+        ButterKnife.bind(this, view)
         return view
     }
 
@@ -62,77 +68,57 @@ class MovieListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        moviesListViewModel.connected()
+
     }
 
     private fun initialiseView() {
         popularMoviesListAdapter = MoviesListAdapter()
         moviesListPopular.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         moviesListPopular.adapter = popularMoviesListAdapter
-        moviesListPopular.addOnScrollListener(moviesListViewModel.getpmPagingManager())
-
-        subscriptions.add(
-            popularMoviesListAdapter.onItemClick()
-                .subscribe({
-                    (activity as MainActivity).openDetails(it)
-                },{
-                    Log.e("MovieListFragment", it.message, it)
-                })
-        )
-
+        moviesListPopular.addOnScrollListener(PagingManager {
+            notifyAskData(POPULAR, popularMoviesListAdapter.getPageNum())
+        })
 
         topRatedMoviesListAdapter = MoviesListAdapter()
         moviesListTopRated.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         moviesListTopRated.adapter = topRatedMoviesListAdapter
-        moviesListTopRated.addOnScrollListener(moviesListViewModel.gettrPagingManager())
+        moviesListTopRated.addOnScrollListener(PagingManager {
+            notifyAskData(TOP_RATED, topRatedMoviesListAdapter.getPageNum())
+        })
 
-        subscriptions.add(
-            topRatedMoviesListAdapter.onItemClick()
-                .subscribe({
-                    (activity as MainActivity).openDetails(it)
-                },{
-                    Log.e("MovieListFragment", it.message, it)
-                })
-        )
 
         upcomingMoviesListAdapter = MoviesListAdapter()
         moviesListUpcoming.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         moviesListUpcoming.adapter = upcomingMoviesListAdapter
-        moviesListUpcoming.addOnScrollListener(moviesListViewModel.getucPagingManager())
+        moviesListUpcoming.addOnScrollListener(PagingManager {
+            notifyAskData(UPCOMING, upcomingMoviesListAdapter.getPageNum())
+        })
 
-        subscriptions.add(
-            upcomingMoviesListAdapter.onItemClick()
-                .subscribe({
-                    (activity as MainActivity).openDetails(it)
-                },{
-                    Log.e("MovieListFragment", it.message, it)
-                })
-        )
+        moviesListViewModel.connected(notifierSubject.hide())
+    }
+
+    private fun notifyAskData(type: ListType, pageNum: Long) {
+        notifierSubject.onNext(type to pageNum)
+    }
+
+
+    private fun updateRecyclerView(type: ListType, result: List<MovieEntity>) {
+        Log.e("MainListFragment", "updateRecyclerView: $type --> ${result.size}")
+        when (type) {
+            POPULAR -> popularMoviesListAdapter.setItems(result)
+            TOP_RATED -> topRatedMoviesListAdapter.setItems(result)
+            UPCOMING -> upcomingMoviesListAdapter.setItems(result)
+        }
     }
 
     private fun initialiseViewModel() {
         moviesListViewModel = ViewModelProviders.of(this, viewModelFactory).get(MovieListViewModel::class.java)
-        moviesListViewModel.getPopularMoviesLiveData().observe(this, Observer { resource ->
-            if (resource != null && !resource.isEmpty()) {
-               popularMoviesListAdapter.setItems(resource)
-            }
-        })
-
-        moviesListViewModel.getTopRatedMoviesLiveData().observe(this, Observer { resource ->
-            if (resource != null && !resource.isEmpty()) {
-                topRatedMoviesListAdapter.setItems(resource)
-            }
-        })
-
-        moviesListViewModel.getUpcomingMoviesLiveData().observe(this, Observer { resource ->
-            if (resource != null && !resource.isEmpty()) {
-                upcomingMoviesListAdapter.setItems(resource)
-            }
+        moviesListViewModel.getScrollResponses().observe(this, Observer {
+            updateRecyclerView(it.first, it.second)
         })
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        subscriptions.clear()
     }
 }

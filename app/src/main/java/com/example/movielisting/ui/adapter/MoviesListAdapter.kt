@@ -37,6 +37,10 @@ class MoviesListAdapter : RecyclerView.Adapter<MoviesListAdapter.CustomViewHolde
         return movies[position]
     }
 
+    fun getPageNum(): Long{
+        return (itemCount / 20).toLong() + 1
+    }
+
     override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
         holder.bindTo(getItem(position))
         holder.itemView.setOnClickListener {
