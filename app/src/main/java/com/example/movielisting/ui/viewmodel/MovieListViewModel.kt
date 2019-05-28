@@ -21,9 +21,9 @@ class MovieListViewModel @Inject constructor(movieApiService: MovieApiService) :
     private val movieRepository: MovieRepository = MovieRepository(movieApiService)
 
     private val subscriptions = CompositeDisposable()
-    private val pmPagingManager = MovieListPagingManager(movieApiService, movieApiService::fetchMoviesPopular)
-    private val trPagingManager = MovieListPagingManager(movieApiService, movieApiService::fetchMoviesTopRated)
-    private val ucPagingManager = MovieListPagingManager(movieApiService, movieApiService::fetchMoviesUpcoming)
+    private val pmPagingManager = MovieListPagingManager(movieApiService::fetchMoviesPopular)
+    private val trPagingManager = MovieListPagingManager(movieApiService::fetchMoviesTopRated)
+    private val ucPagingManager = MovieListPagingManager(movieApiService::fetchMoviesUpcoming)
 
     fun getPopularMoviesLiveData() = popularMoviesLD
     fun getTopRatedMoviesLiveData() = topRatedMoviesLD

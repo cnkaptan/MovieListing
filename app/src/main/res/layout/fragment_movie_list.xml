@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/overlayLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <include
-        layout="@layout/view_loader"/>
-
-
-    <include
-        layout="@layout/view_empty"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:weightSum="3">
 
@@ -36,6 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_below="@id/title_popular_movies"
+                android:nestedScrollingEnabled="false"
                 android:padding="8dp"/>
 
         </RelativeLayout>
@@ -59,6 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_below="@id/title_top_rated_movies"
+                android:nestedScrollingEnabled="false"
                 android:padding="8dp"/>
 
         </RelativeLayout>
@@ -82,10 +79,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_below="@id/title_upcoming"
+                android:nestedScrollingEnabled="false"
                 android:padding="8dp"/>
 
         </RelativeLayout>
 
     </LinearLayout>
 
-</FrameLayout>
+</androidx.core.widget.NestedScrollView>

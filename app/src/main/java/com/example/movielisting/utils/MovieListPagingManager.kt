@@ -9,8 +9,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 
-class MovieListPagingManager(private val movieApiService: MovieApiService,
-                             private val pageApifunc: (Long) -> Single<MovieApiResponse>) : PagingManager() {
+class MovieListPagingManager(private val pageApifunc: (Long) -> Single<MovieApiResponse>) : PagingManager() {
     private val paginationRequestSubject = BehaviorSubject.create<MovieApiResponse>()
     private val compositeDisposable = CompositeDisposable()
 

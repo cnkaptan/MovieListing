@@ -31,11 +31,6 @@ class MovieListFragment : Fragment() {
     @BindView(R.id.movies_list_upcoming)
     lateinit var moviesListUpcoming: RecyclerView
 
-    @BindView(R.id.root_view)
-    lateinit var loaderRoot: ViewGroup
-
-    @BindView(R.id.emptyContainer)
-    lateinit var emptyContainer: ViewGroup
 
     @Inject
     internal lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -106,7 +101,7 @@ class MovieListFragment : Fragment() {
         moviesListUpcoming.addOnScrollListener(moviesListViewModel.getucPagingManager())
 
         subscriptions.add(
-            topRatedMoviesListAdapter.onItemClick()
+            upcomingMoviesListAdapter.onItemClick()
                 .subscribe({
                     (activity as MainActivity).openDetails(it)
                 },{
