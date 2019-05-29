@@ -2,7 +2,6 @@ package com.example.movielisting.utils
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.movielisting.data.repository.ListType
 
 class PagingManager(private val listener: () -> Unit) : RecyclerView.OnScrollListener() {
     var loading = false

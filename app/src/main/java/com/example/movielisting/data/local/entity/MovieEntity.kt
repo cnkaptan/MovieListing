@@ -4,6 +4,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
+open class Entity
+
 data class MovieEntity(
     @SerializedName("id")
     var id: Long,
@@ -45,7 +47,7 @@ data class MovieEntity(
     var voteAverage: String,
 
     var status: String?
-) : Parcelable {
+) : Parcelable, Entity() {
     constructor(parcel: Parcel) : this(
         parcel.readLong(),
         parcel.readString(),

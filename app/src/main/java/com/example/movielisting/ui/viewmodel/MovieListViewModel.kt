@@ -1,10 +1,9 @@
 package com.example.movielisting.ui.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.movielisting.data.local.entity.MovieEntity
+import com.example.movielisting.data.Resource
+import com.example.movielisting.data.local.entity.*
 import com.example.movielisting.data.remote.api.MovieApiService
 import com.example.movielisting.data.repository.*
 import io.reactivex.Observable
@@ -17,57 +16,65 @@ const val TAG = "MovieListViewModel"
 
 class MovieListViewModel @Inject constructor(movieApiService: MovieApiService) : ViewModel() {
 
-    private val responseDataObservable = PublishSubject.create<Pair<ListType, List<MovieEntity>>>()
+    private val responseDataObservable = PublishSubject.create<Resource<MovieTypeResponseEvent>>()
     private val movieRepository: MovieRepository = MovieRepository(movieApiService)
 
     private val subscriptions = CompositeDisposable()
 
-    fun connected(events: Observable<Pair<ListType, Long>>) {
-        events.doOnNext { Log.e(TAG, "${it.first} , ${it.second}") }
+    fun connected(events: Observable<MovieTypeRequestEvent>) {
+        events
             .flatMap {
-                checkData(it.second, it.first)
+                responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
+                checkData(it)
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                responseDataObservable.onNext(it.first to it.second)
+                responseDataObservable.onNext(Resource.success(it))
             }
 
         subscriptions.add(
-            checkData(1, POPULAR)
-                .doOnNext { Log.e(TAG, "next $POPULAR") }
+            Observable.just(MovieTypeRequestEvent(POPULAR,1))
+                .doOnNext {
+                    responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
+                }
+                .flatMap { checkData(it) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    responseDataObservable.onNext(it)
+                    responseDataObservable.onNext(Resource.success(it))
                 }, {
                     Log.e(TAG, it.message, it)
                 })
         )
         subscriptions.add(
-            checkData(1, TOP_RATED)
-                .doOnNext { Log.e(TAG, "next $TOP_RATED") }
+            Observable.just(MovieTypeRequestEvent(TOP_RATED,1))
+                .doOnNext {
+                    responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
+                }
+                .flatMap { checkData(it) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    responseDataObservable.onNext(it)
+                    responseDataObservable.onNext(Resource.success(it))
                 }, {
                     Log.e(TAG, it.message, it)
                 })
         )
 
         subscriptions.add(
-            checkData(1, UPCOMING)
+            Observable.just(MovieTypeRequestEvent(UPCOMING,1))
                 .doOnNext {
-                    Log.e(TAG, "next $UPCOMING")
+                    responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
                 }
+                .flatMap { checkData(it) }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    responseDataObservable.onNext(it)
+                    responseDataObservable.onNext(Resource.success(it))
                 }, {
                     Log.e(TAG, it.message, it)
                 })
         )
     }
 
-    fun getScrollResponses(): Observable<Pair<ListType, List<MovieEntity>>> {
+    fun getScrollResponses(): Observable<Resource<MovieTypeResponseEvent>> {
         return responseDataObservable.hide()
     }
 
@@ -76,8 +83,9 @@ class MovieListViewModel @Inject constructor(movieApiService: MovieApiService) :
         subscriptions.clear()
     }
 
-    fun checkData(needPage: Long, type: ListType): Observable<Pair<ListType, List<MovieEntity>>> {
-        return movieRepository.getPopularMovies(needPage, type)
+    fun checkData(movieTypeRequestEvent: MovieTypeRequestEvent): Observable<MovieTypeResponseEvent> {
+        return movieRepository.getPopularMovies(movieTypeRequestEvent)
+            .doOnNext { Log.e(TAG, "${it.type} ${it.result.size}") }
     }
 
 }

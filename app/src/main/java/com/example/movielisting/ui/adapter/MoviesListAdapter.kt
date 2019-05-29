@@ -7,34 +7,64 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.movielisting.R
+import com.example.movielisting.data.Resource
+import com.example.movielisting.data.local.entity.Entity
 import com.example.movielisting.data.local.entity.MovieEntity
+import com.example.movielisting.data.local.entity.MovieTypeResponseEvent
 import com.squareup.picasso.Picasso
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 
-class MoviesListAdapter : RecyclerView.Adapter<MoviesListAdapter.CustomViewHolder>() {
-    private var movies: MutableList<MovieEntity> = mutableListOf()
+class MoviesListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    companion object{
+        const val LOADING_TYPE = 0
+        const val SUCCESS_TYPE = 1
+
+    }
+    private var movies: MutableList<Entity> = mutableListOf()
     private val clickSubject = PublishSubject.create<MovieEntity>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_movie, parent, false)
-        return CustomViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when(viewType){
+            SUCCESS_TYPE -> {
+                CustomViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_movie, parent, false))
+            }
+            else -> {
+                LoadingViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_item_loading, parent, false))
+            }
+        }
     }
 
-    fun setItems(movies: List<MovieEntity>) {
-        this.movies.addAll(movies)
+    fun setItems(resource: Resource<MovieTypeResponseEvent>) {
+        if (resource.isLoading){
+            this.movies.add(Entity())
+        }else if (resource.isSuccess && movies.size > 0){
+            this.movies = this.movies.filter {
+                it is MovieEntity
+            }.toMutableList()
+            this.movies.addAll(resource.data!!.result)
+        }else{
+            this.movies.addAll(resource.data!!.result)
+        }
         notifyDataSetChanged()
-        Log.e("MovieListAdapter", "Dataset Size = ${this.movies.size}")
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when(getItem(position)){
+            is MovieEntity -> SUCCESS_TYPE
+            else -> LOADING_TYPE
+        }
     }
 
     override fun getItemCount(): Int {
         return movies.size
     }
 
-    fun getItem(position: Int): MovieEntity {
+    fun getItem(position: Int): Entity {
         return movies[position]
     }
 
@@ -42,16 +72,22 @@ class MoviesListAdapter : RecyclerView.Adapter<MoviesListAdapter.CustomViewHolde
         return (itemCount / 20).toLong() + 1
     }
 
-    override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
-        holder.bindTo(getItem(position))
-        holder.itemView.setOnClickListener {
-            clickSubject.onNext(movies[holder.adapterPosition])
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when(holder){
+            is CustomViewHolder -> {
+                holder.bindTo(getItem(position) as MovieEntity)
+                holder.itemView.setOnClickListener {
+                    clickSubject.onNext(movies[holder.adapterPosition] as MovieEntity)
+                }
+            }
+            is LoadingViewHolder -> holder.bindTo()
         }
+
     }
 
     fun onItemClick(): Observable<MovieEntity> = clickSubject.hide()
 
-    class CustomViewHolder(private val item: View) : RecyclerView.ViewHolder(item) {
+    class CustomViewHolder(item: View) : RecyclerView.ViewHolder(item) {
         var image: ImageView = (item as ViewGroup).findViewById(R.id.image)
 
 
@@ -62,4 +98,10 @@ class MoviesListAdapter : RecyclerView.Adapter<MoviesListAdapter.CustomViewHolde
         }
     }
 
+    class LoadingViewHolder(item: View) : RecyclerView.ViewHolder(item) {
+        var loading: ProgressBar = (item as ViewGroup).findViewById(R.id.loading)
+        fun bindTo() {
+            loading.visibility = View.VISIBLE
+        }
+    }
 }
