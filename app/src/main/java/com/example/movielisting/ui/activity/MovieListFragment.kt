@@ -29,6 +29,10 @@ import javax.inject.Inject
 
 class MovieListFragment : Fragment() {
 
+    private lateinit var popularPM: PagingManager
+    private lateinit var topRatedPM: PagingManager
+    private lateinit var upcomingPM: PagingManager
+
     @BindView(R.id.movies_list_popular)
     lateinit var moviesListPopular: RecyclerView
 
@@ -75,24 +79,27 @@ class MovieListFragment : Fragment() {
         popularMoviesListAdapter = MoviesListAdapter()
         moviesListPopular.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         moviesListPopular.adapter = popularMoviesListAdapter
-        moviesListPopular.addOnScrollListener(PagingManager {
+        popularPM = PagingManager {
             notifyAskData(POPULAR, popularMoviesListAdapter.getPageNum())
-        })
+        }
+        moviesListPopular.addOnScrollListener(popularPM)
 
         topRatedMoviesListAdapter = MoviesListAdapter()
         moviesListTopRated.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         moviesListTopRated.adapter = topRatedMoviesListAdapter
-        moviesListTopRated.addOnScrollListener(PagingManager {
+        topRatedPM = PagingManager {
             notifyAskData(TOP_RATED, topRatedMoviesListAdapter.getPageNum())
-        })
+        }
+        moviesListTopRated.addOnScrollListener(topRatedPM)
 
 
         upcomingMoviesListAdapter = MoviesListAdapter()
         moviesListUpcoming.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         moviesListUpcoming.adapter = upcomingMoviesListAdapter
-        moviesListUpcoming.addOnScrollListener(PagingManager {
+        upcomingPM = PagingManager {
             notifyAskData(UPCOMING, upcomingMoviesListAdapter.getPageNum())
-        })
+        }
+        moviesListUpcoming.addOnScrollListener(upcomingPM)
 
         moviesListViewModel.connected(notifierSubject.hide())
     }
@@ -105,17 +112,26 @@ class MovieListFragment : Fragment() {
     private fun updateRecyclerView(type: ListType, result: List<MovieEntity>) {
         Log.e("MainListFragment", "updateRecyclerView: $type --> ${result.size}")
         when (type) {
-            POPULAR -> popularMoviesListAdapter.setItems(result)
-            TOP_RATED -> topRatedMoviesListAdapter.setItems(result)
-            UPCOMING -> upcomingMoviesListAdapter.setItems(result)
+            POPULAR -> {
+                popularMoviesListAdapter.setItems(result)
+                popularPM.loading = false
+            }
+            TOP_RATED -> {
+                topRatedMoviesListAdapter.setItems(result)
+                topRatedPM.loading = false
+            }
+            UPCOMING -> {
+                upcomingMoviesListAdapter.setItems(result)
+                upcomingPM.loading = false
+            }
         }
     }
 
     private fun initialiseViewModel() {
         moviesListViewModel = ViewModelProviders.of(this, viewModelFactory).get(MovieListViewModel::class.java)
-        moviesListViewModel.getScrollResponses().observe(this, Observer {
+        moviesListViewModel.getScrollResponses().subscribe {
             updateRecyclerView(it.first, it.second)
-        })
+        }
     }
 
     override fun onDestroyView() {

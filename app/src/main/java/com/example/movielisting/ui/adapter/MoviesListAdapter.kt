@@ -2,6 +2,7 @@ package com.example.movielisting.ui.adapter
 
 import android.app.Activity
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,9 +25,9 @@ class MoviesListAdapter : RecyclerView.Adapter<MoviesListAdapter.CustomViewHolde
     }
 
     fun setItems(movies: List<MovieEntity>) {
-        val startPosition = this.movies.size
         this.movies.addAll(movies)
-        notifyItemRangeChanged(startPosition, movies.size)
+        notifyDataSetChanged()
+        Log.e("MovieListAdapter", "Dataset Size = ${this.movies.size}")
     }
 
     override fun getItemCount(): Int {

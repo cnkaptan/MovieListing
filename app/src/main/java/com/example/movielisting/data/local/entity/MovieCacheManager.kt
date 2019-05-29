@@ -4,7 +4,7 @@ import com.example.movielisting.data.remote.model.MovieApiResponse
 
 class MovieCacheManager {
     val results = mutableListOf<MovieEntity>()
-    private var currentPage = -1L
+    var currentPage = -1L
     var totalPage = -1L
     var hasNext = true
 
