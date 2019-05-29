@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -8,75 +8,82 @@
     android:orientation="vertical"
     android:weightSum="3">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/title_popular_movies"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:weightSum="3">
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Popular"
-            android:padding="8dp"
-            android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/movies_list_popular"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/title_popular_movies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Popular"
+                android:padding="8dp"
+                android:textColor="@android:color/white"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/movies_list_popular"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/title_popular_movies"
+                android:nestedScrollingEnabled="false"
+                android:padding="8dp"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/title_popular_movies"
-            android:nestedScrollingEnabled="false"
-            android:padding="8dp"/>
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/title_top_rated_movies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Top Rated"
+                android:padding="8dp"
+                android:textColor="@android:color/white"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
 
-    </RelativeLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/movies_list_top_rated"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/title_top_rated_movies"
+                android:nestedScrollingEnabled="false"
+                android:padding="8dp"/>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/title_top_rated_movies"
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Top Rated"
-            android:padding="8dp"
-            android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/title_upcoming"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upcoming"
+                android:padding="8dp"
+                android:textColor="@android:color/white"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/movies_list_top_rated"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/title_top_rated_movies"
-            android:nestedScrollingEnabled="false"
-            android:padding="8dp"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/movies_list_upcoming"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/title_upcoming"
+                android:nestedScrollingEnabled="false"
+                android:padding="8dp"/>
 
-    </RelativeLayout>
+        </RelativeLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/title_upcoming"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Upcoming"
-            android:padding="8dp"
-            android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/movies_list_upcoming"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/title_upcoming"
-            android:nestedScrollingEnabled="false"
-            android:padding="8dp"/>
-
-    </RelativeLayout>
-
-</LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
