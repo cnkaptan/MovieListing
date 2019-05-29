@@ -22,45 +22,28 @@ class MovieListViewModel @Inject constructor(movieApiService: MovieApiService) :
     private val subscriptions = CompositeDisposable()
 
     fun connected(events: Observable<MovieTypeRequestEvent>) {
-        events
-            .flatMap {
-                responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
-                checkData(it)
-            }
+        subscriptions.add(events.flatMap {
+            responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
+            checkData(it)
+        }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                responseDataObservable.onNext(Resource.success(it))
-            }
-
-        subscriptions.add(
-            Observable.just(MovieTypeRequestEvent(POPULAR,1))
-                .doOnNext {
-                    responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
-                }
-                .flatMap { checkData(it) }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
+            .subscribe(
+                {
                     responseDataObservable.onNext(Resource.success(it))
                 }, {
                     Log.e(TAG, it.message, it)
-                })
-        )
-        subscriptions.add(
-            Observable.just(MovieTypeRequestEvent(TOP_RATED,1))
-                .doOnNext {
-                    responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
                 }
-                .flatMap { checkData(it) }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    responseDataObservable.onNext(Resource.success(it))
-                }, {
-                    Log.e(TAG, it.message, it)
-                })
+            )
         )
 
-        subscriptions.add(
-            Observable.just(MovieTypeRequestEvent(UPCOMING,1))
+        val firstTrigger = listOf(
+            MovieTypeRequestEvent(POPULAR, 1),
+            MovieTypeRequestEvent(TOP_RATED, 1),
+            MovieTypeRequestEvent(UPCOMING, 1)
+        )
+
+
+        subscriptions.add(Observable.fromIterable(firstTrigger)
                 .doOnNext {
                     responseDataObservable.onNext(Resource.loading(MovieTypeResponseEvent(it.type, emptyList())))
                 }
