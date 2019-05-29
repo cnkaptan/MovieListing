@@ -33,7 +33,7 @@ class MovieRepository(private val movieApiService: MovieApiService) {
     fun getFromMemoryCache(movieTypeRequestEvent: MovieTypeRequestEvent): Observable<MovieTypeResponseEvent> {
         val respCacheManager = cachedMovies[movieTypeRequestEvent.type]!!
         return if (movieTypeRequestEvent.page > respCacheManager.currentPage) {
-            getPopularMoviesByApi(movieTypeRequestEvent)
+            Observable.empty()
         } else {
             val results = cachedMovies[movieTypeRequestEvent.type]!!.results as List<MovieEntity>
             Observable.just(MovieTypeResponseEvent(movieTypeRequestEvent.type, results))
